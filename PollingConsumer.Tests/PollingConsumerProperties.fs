@@ -1,5 +1,9 @@
-﻿namespace PollingConsumer.Tests
+﻿module Samples.PollingConsumerProperties
 
-module Say =
-    let hello name =
-        printfn "Hello %s" name
+open FsCheck.Xunit
+open Swensen.Unquote
+open PollingConsumer
+open Xunit
+
+[<Fact>]
+let MY_SUPER_TEST () = Assert.True(true)
