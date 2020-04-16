@@ -15,7 +15,7 @@ module Untimed =
     let withResult newResult x = map (fun _ -> newResult) x
 
 module Timed =
-    let captured clock x =
+    let capture clock x =
         let now = clock()
         { Started = now; Stopped = now; Result = x }
 
@@ -24,7 +24,7 @@ module Timed =
         let stopped = clock ()
         { Started = x.Started; Stopped = stopped; Result = result }
     
-    let timeOn clock f x = x |> captured clock |> map clock f
+    let timeOn clock f x = x |> capture clock |> map clock f
 
 module Clocks =
     let machineClock () = DateTimeOffset.Now
@@ -108,10 +108,10 @@ let idle (idleDuration : TimeSpan) () =
     printfn "Sleeping"
     Timed.timeOn Clocks.machineClock s ()
 
-let shouldPoll stoppedBefore calculateExpectedDuration (r : ReadyData) : bool =
+let shouldPoll stopBefore calculateExpectedDuration (r : ReadyData) : bool =
     let durations = r.Result
     let expectedHandleDuration = calculateExpectedDuration durations
-    r.Stopped + expectedHandleDuration < stoppedBefore
+    r.Stopped + expectedHandleDuration < stopBefore
 
 let poll pollForMessage clock handle () =
     let p () =
@@ -132,7 +132,7 @@ let calculateAverage (durations : TimeSpan list) =
         |> TimeSpan.FromTicks
         |> Some
 
-let calculateAverageAndStandardDEviation durations =
+let calculateAverageAndStandardDeviation durations =
     let stdDev (avg : TimeSpan) =
         durations
         |> List.averageBy (fun x -> ((x - avg).Ticks |> float) ** 2.)
@@ -141,9 +141,61 @@ let calculateAverageAndStandardDEviation durations =
         |> TimeSpan.FromTicks
     durations |> calculateAverage |> Option.map (fun avg -> avg, stdDev avg)
 
+// The expected duration is the average duration, plus three standard
+// deviations. Assuming a normal distribution of durations, this should include
+// 99.7 % of all durations. If the list of durations is empty, this function
+// falls back on an estimated duration that the caller must supply as a wild
+// guess.
 let calculateExpectedDuration estimatedDuration durations =
-    match calculateAverageAndStandardDEviation durations with
+    match calculateAverageAndStandardDeviation durations with
     | None -> estimatedDuration
-    | Some (avg, stdDev) -> avg + stdDev + stdDev + stdDev
+    | Some (avg, stdDev) -> avg + stdDev + stdDev + stdDev // avg + stdDev * 3
 
+// Simulation functions
 
+let simulatedPollForMessage
+    (r : Random) () =
+
+    printfn "Polling"
+
+    r.Next(100, 1000)
+    |> Async.Sleep
+    |> Async.RunSynchronously
+
+    if r.Next(0, 100) < 50
+    then Some ()
+    else None
+
+let simulatedHandle
+    (r : Random) () =
+
+    printfn "Handling"
+
+    r.Next(100, 1000)
+    |> Async.Sleep
+    |> Async.RunSynchronously
+
+// Configuration
+let clock = Clocks.machineClock
+let now' = DateTimeOffset.Now
+let stopBefore' = now' + TimeSpan.FromSeconds 20.
+let estimatedDuration' = TimeSpan.FromSeconds 2.
+let idleDuration' = TimeSpan.FromSeconds 5.
+
+// Compose functions
+let shouldPoll' =
+    shouldPoll stopBefore' (calculateExpectedDuration estimatedDuration') 
+
+let r' = Random()
+let handle' = simulatedHandle r'
+let pollForMessage' = simulatedPollForMessage r'
+let poll' = poll pollForMessage' clock handle'
+
+let shouldIdle' = shouldIdle idleDuration' stopBefore'
+
+let idle' = idle idleDuration'
+
+let transition' = transition shouldPoll' poll' shouldIdle' idle'
+let run' = run transition'
+
+let result' = [] |> Timed.capture clock |> ReadyState |> run'
