@@ -122,5 +122,21 @@ let poll pollForMessage clock handle () =
         | None -> None
     Timed.timeOn clock p ()    
 
+let calculateAverage (durations : TimeSpan list) =
+    if durations.IsEmpty
+    then None
+    else
+        durations
+        |> List.averageBy (fun x -> float x.Ticks)
+        |> int64
+        |> TimeSpan.FromTicks
+        |> Some
 
-
+let calculateAverageAndStandardDEviation durations =
+    let stdDev (avg : TimeSpan) =
+        durations
+        |> List.averageBy (fun x -> ((x - avg).Ticks |> float) ** 2.)
+        |> sqrt
+        |> int64
+        |> TimeSpan.FromTicks
+    durations |> calculateAverage |> Option.map (fun avg -> avg, stdDev avg)
