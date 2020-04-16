@@ -25,3 +25,8 @@ module Timed =
         { Started = x.Started; Stopped = stopped; Result = result }
     
     let timeOn clock f x = x |> captured clock |> map clock f
+
+module Clocks =
+    let machineClock () = DateTimeOffset.Now
+
+    
