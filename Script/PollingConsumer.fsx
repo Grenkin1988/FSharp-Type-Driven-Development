@@ -44,15 +44,17 @@ module Clocks =
 type Todo = unit
 let todo () = ()
 
+// Auxiliary types
+type MessageHandler = unit -> Timed<unit>
+
 // State date
-type ReadyData = Timed<Todo>
+type ReadyData = Timed<TimeSpan list>
 
-type ReceivedMessageData = Timed<Todo>
+type ReceivedMessageData = Timed<MessageHandler>
 
-type NoMessageData = Timed<Todo>
+type NoMessageData = Timed<TimeSpan list>
 
 // State
-
 type PollingConsumer =
     | ReadyState of ReadyData
     | ReceivedMessageState of ReceivedMessageData
@@ -60,21 +62,20 @@ type PollingConsumer =
     | StoppedState
 
 // Transitions
-
 let transitionFromStopped = StoppedState
 
 let transitionFromNoMessage shouldIdle idle (nm : NoMessageData) =
     if shouldIdle nm
-    then idle() |> ReadyState
+    then idle() |> Untimed.withResult nm.Result |> ReadyState
     else StoppedState
 
-let transitionFromReady shouldPoll poll (r : ReadyData) : PollingConsumer =
+let transitionFromReady shouldPoll poll (r : ReadyData) =
     if shouldPoll r
     then
         let msg = poll ()
         match msg.Result with
-        | Some _ -> msg |> Untimed.withResult () |> ReceivedMessageState
-        | None -> msg |> Untimed.withResult () |> NoMessageState
+        | Some h -> msg |> Untimed.withResult h |> ReceivedMessageState
+        | None -> msg |> Untimed.withResult r.Result |> NoMessageState
     else StoppedState
 
 
