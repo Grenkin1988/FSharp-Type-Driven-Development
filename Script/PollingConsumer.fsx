@@ -95,3 +95,22 @@ let transition shouldPoll poll shouldIdle idle  state =
     | ReceivedMessageState rm -> transitionFromReceived rm
     | NoMessageState nm -> transitionFromNoMessage shouldIdle idle nm
     | StoppedState -> transitionFromStopped
+
+let shouldIdle idleDuration stopBefore (nm : NoMessageData) : bool =
+    nm.Stopped + idleDuration < stopBefore
+
+let idle (idleDuration : TimeSpan) () =
+    let s () =
+        idleDuration.TotalMilliseconds
+        |> int 
+        |> Async.Sleep
+        |> Async.RunSynchronously 
+    printfn "Sleeping"
+    Timed.timeOn Clocks.machineClock s ()
+
+
+
+
+
+
+
