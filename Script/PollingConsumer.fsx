@@ -29,4 +29,13 @@ module Timed =
 module Clocks =
     let machineClock () = DateTimeOffset.Now
 
-    
+    let acclock (start:DateTimeOffset) rate () =
+        let now = DateTimeOffset.Now
+        let ellapsed = now - start
+        start.AddTicks (ellapsed.Ticks * rate)
+
+    open System.Collections.Generic
+
+    let qlock (q : Queue<DateTimeOffset>) = q.Dequeue    
+
+    let seqlock (l : DateTimeOffset seq) = Queue<DateTimeOffset> l |> qlock
