@@ -50,7 +50,7 @@ type MessageHandler = unit -> Timed<unit>
 // State date
 type ReadyData = Timed<TimeSpan list>
 
-type ReceivedMessageData = Timed<MessageHandler>
+type ReceivedMessageData = Timed<TimeSpan list * MessageHandler>
 
 type NoMessageData = Timed<TimeSpan list>
 
@@ -74,8 +74,14 @@ let transitionFromReady shouldPoll poll (r : ReadyData) =
     then
         let msg = poll ()
         match msg.Result with
-        | Some h -> msg |> Untimed.withResult h |> ReceivedMessageState
+        | Some h -> msg |> Untimed.withResult (r.Result, h) |> ReceivedMessageState
         | None -> msg |> Untimed.withResult r.Result |> NoMessageState
     else StoppedState
 
-
+let transitionFromReceived (rm : ReceivedMessageData) = 
+    let durations, handleMessage = rm.Result
+    let t = handleMessage ()
+    let pollDuration = rm.Duration
+    let handleDuration = t.Duration
+    let totalDuration = pollDuration + handleDuration
+    t |> Untimed.withResult (totalDuration :: durations) |> ReadyState
