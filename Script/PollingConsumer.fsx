@@ -1,6 +1,6 @@
 open System
 
-type Time<'a> =
+type Timed<'a> =
     {
         Started : DateTimeOffset
         Stopped : DateTimeOffset
@@ -39,3 +39,35 @@ module Clocks =
     let qlock (q : Queue<DateTimeOffset>) = q.Dequeue    
 
     let seqlock (l : DateTimeOffset seq) = Queue<DateTimeOffset> l |> qlock
+
+// Tempopary placeholder
+type Todo = unit
+let todo () = ()
+
+// State date
+type ReadyData = Timed<Todo>
+
+type ReceivedMessageData = Todo
+
+type NoMessageData = Todo
+
+// State
+
+type PollingConsumer =
+    | ReadyState of ReadyData
+    | ReceivedMessageState of ReceivedMessageData
+    | NoMessageState of NoMessageData
+    | StoppedState
+
+// Transitions
+
+let transitionFromStopped = StoppedState
+
+let transitionFromNoMessage shouldIdle idle (nm : NoMessageData) =
+    if shouldIdle nm
+    then idle() |> ReadyState
+    else StoppedState
+
+
+
+
