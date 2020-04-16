@@ -140,3 +140,10 @@ let calculateAverageAndStandardDEviation durations =
         |> int64
         |> TimeSpan.FromTicks
     durations |> calculateAverage |> Option.map (fun avg -> avg, stdDev avg)
+
+let calculateExpectedDuration estimatedDuration durations =
+    match calculateAverageAndStandardDEviation durations with
+    | None -> estimatedDuration
+    | Some (avg, stdDev) -> avg + stdDev + stdDev + stdDev
+
+
