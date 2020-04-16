@@ -40,10 +40,6 @@ module Clocks =
 
     let seqlock (l : DateTimeOffset seq) = Queue<DateTimeOffset> l |> qlock
 
-// Tempopary placeholder
-type Todo = unit
-let todo () = ()
-
 // Auxiliary types
 type MessageHandler = unit -> Timed<unit>
 
@@ -85,3 +81,17 @@ let transitionFromReceived (rm : ReceivedMessageData) =
     let handleDuration = t.Duration
     let totalDuration = pollDuration + handleDuration
     t |> Untimed.withResult (totalDuration :: durations) |> ReadyState
+
+// State machine
+let rec run trans state =
+    let nextState = trans state
+    match nextState with
+    | StoppedState -> StoppedState
+    | _ -> run trans nextState
+
+let transition shouldPoll poll shouldIdle idle  state =
+    match state with
+    | ReadyState r -> transitionFromReady shouldPoll poll r
+    | ReceivedMessageState rm -> transitionFromReceived rm
+    | NoMessageState nm -> transitionFromNoMessage shouldIdle idle nm
+    | StoppedState -> transitionFromStopped
