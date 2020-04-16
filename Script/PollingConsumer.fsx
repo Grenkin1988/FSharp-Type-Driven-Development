@@ -108,9 +108,19 @@ let idle (idleDuration : TimeSpan) () =
     printfn "Sleeping"
     Timed.timeOn Clocks.machineClock s ()
 
+let shouldPoll stoppedBefore calculateExpectedDuration (r : ReadyData) : bool =
+    let durations = r.Result
+    let expectedHandleDuration = calculateExpectedDuration durations
+    r.Stopped + expectedHandleDuration < stoppedBefore
 
-
-
+let poll pollForMessage clock handle () =
+    let p () =
+        match pollForMessage () with
+        | Some msg ->
+            let h () = Timed.timeOn clock (handle >> ignore) msg
+            Some (h : MessageHandler)
+        | None -> None
+    Timed.timeOn clock p ()    
 
 
 
