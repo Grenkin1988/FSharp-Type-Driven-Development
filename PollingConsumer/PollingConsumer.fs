@@ -13,7 +13,7 @@ type ReceivedMessageData = Timed<TimeSpan list * MessageHandler>
 type NoMessageData = Timed<TimeSpan list>
 
 // State
-type PollingConsumer =
+type State =
     | ReadyState of ReadyData
     | ReceivedMessageState of ReceivedMessageData
     | NoMessageState of NoMessageData
