@@ -47,9 +47,9 @@ let todo () = ()
 // State date
 type ReadyData = Timed<Todo>
 
-type ReceivedMessageData = Todo
+type ReceivedMessageData = Timed<Todo>
 
-type NoMessageData = Todo
+type NoMessageData = Timed<Todo>
 
 // State
 
@@ -68,6 +68,13 @@ let transitionFromNoMessage shouldIdle idle (nm : NoMessageData) =
     then idle() |> ReadyState
     else StoppedState
 
-
+let transitionFromReady shouldPoll poll (r : ReadyData) : PollingConsumer =
+    if shouldPoll r
+    then
+        let msg = poll ()
+        match msg.Result with
+        | Some _ -> msg |> Untimed.withResult () |> ReceivedMessageState
+        | None -> msg |> Untimed.withResult () |> NoMessageState
+    else StoppedState
 
 
