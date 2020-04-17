@@ -11,3 +11,6 @@ build/
 .paket/
 paket-files/
 packages/
+
+TestResult*
+*.log

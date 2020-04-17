@@ -1,0 +1,8 @@
+<Project>
+    <PropertyGroup>
+      <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+      <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+      <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+	  <OutputPath>$(MSBuildThisFileDirectory)/build/</OutputPath>
+    </PropertyGroup>
+</Project>
