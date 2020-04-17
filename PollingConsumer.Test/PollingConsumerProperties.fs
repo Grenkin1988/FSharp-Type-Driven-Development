@@ -1,9 +1,8 @@
 ﻿module Samples.PollingConsumerProperties
 
-open FsCheck.Xunit
 open Swensen.Unquote
 open PollingConsumer
-open Xunit
+open NUnit.Framework
 
-[<Fact>]
-let MY_SUPER_TEST () = Assert.True(true)
+[<Test>]
+let MY_SUPER_TEST () = Assert.IsTrue(true)

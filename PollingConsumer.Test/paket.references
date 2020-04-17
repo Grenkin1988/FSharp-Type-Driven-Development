@@ -1,0 +1,6 @@
+FSharp.Core
+group Tools
+NUnit
+FsCheck
+NUnit3TestAdapter
+Unquote

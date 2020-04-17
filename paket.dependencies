@@ -1,0 +1,13 @@
+source https://api.nuget.org/v3/index.json
+framework: netcoreapp3.1
+nuget FSharp.Core
+
+group Tools
+    source https://api.nuget.org/v3/index.json
+    framework: netcoreapp3.1
+	nuget FsCheck
+    nuget FsCheck.NUnit
+    nuget Unquote
+	nuget NUnit
+	nuget NUnit.Runners
+    nuget NUnit3TestAdapter

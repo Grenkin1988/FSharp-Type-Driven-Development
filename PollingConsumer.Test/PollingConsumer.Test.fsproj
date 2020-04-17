@@ -2,12 +2,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Timed.fs" />
-    <Compile Include="PollingConsumer.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="PollingConsumerProperties.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PollingConsumer\PollingConsumer.fsproj" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
