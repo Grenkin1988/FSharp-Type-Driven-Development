@@ -10,18 +10,6 @@ open System
 [<TestFixture>]
 module StateMachineTests =
     [<Test>]
-    let ``run runs until stopped`` () =
-        let test (states: State list) (start: State) =        
-            states
-            |> List.exists ((=) StoppedState) ==> lazy
-            let q = System.Collections.Generic.Queue<State> states
-            let transition _ = q.Dequeue()
-            let actual : State = run transition start
-            StoppedState =! actual
-
-        Check.QuickThrowOnFailure test
-
-    [<Test>]
     let ``unfurl returns correct seq with constant transitions`` () =
         let test 
             (initial: string)
@@ -66,6 +54,23 @@ module StateMachineTests =
 
         Check.QuickThrowOnFailure test
 
+    type WithoutStoppedStste =
+        static member State() =
+            Arb.Default.Derive()
+            |> Arb.filter (not << isStopped)
+
+    [<Test>]
+    let ``run returns last element of seq without stops`` () =
+        let test (states: State list) =
+            not states.IsEmpty ==> lazy
+            
+            let actual : State = run states
+            let expected = states |> Seq.last
+            expected =! actual
+
+        let config = Config.QuickThrowOnFailure
+        let config = { config with Arbitrary = [ typeof<WithoutStoppedStste>] }
+        Check.One (config,test)
 
 
 

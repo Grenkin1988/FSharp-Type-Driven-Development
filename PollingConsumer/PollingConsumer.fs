@@ -66,9 +66,9 @@ let rec unfurl getNext state =
         yield! unfurl getNext next
     }
 
+let isStopped = function StoppedState -> true | _ -> false
 
-
-let run transition start =
-    StoppedState
+let run states =
+    states |> Seq.last
 
 
