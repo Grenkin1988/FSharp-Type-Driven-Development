@@ -1,12 +1,13 @@
-﻿namespace Samples
+﻿namespace Samples.PollingConsumerProperties
 
 open Swensen.Unquote
-open PollingConsumer
+open Samples
+open Samples.PollingConsumer
 open NUnit.Framework
 open FsCheck
 
 [<TestFixture>]
-module PollingConsumerProperties =
+module TransitionTests =
     [<Test>]
     let ``transitionFromNoMessage returns correct result when it should idle`` () =
         let test (nm : NoMessageData) (idleRes : Timed<unit>) =        

@@ -7,7 +7,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <Compile Include="PollingConsumerProperties.fs" />
+    <Compile Include="TransitionTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FsCheck" Version="2.14.2" />
