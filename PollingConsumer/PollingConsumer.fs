@@ -35,3 +35,20 @@ let transitionFromNoMessage shouldIdle idle nm =
     if shouldIdle ()
     then idle () |> Untimed.withResult nm.Result |> ReadyState
     else StoppedState
+
+let transitionFromReady shouldPoll poll (r : ReadyData) =
+    if shouldPoll ()
+    then
+        let msg = poll()
+        match msg.Result with
+        | None -> msg |> Untimed.withResult r.Result |> NoMessageState
+        | Some mh ->
+            msg 
+            |> Untimed.withResult (r.Result, mh) 
+            |> ReceivedMessageState
+    else StoppedState
+
+
+
+
+

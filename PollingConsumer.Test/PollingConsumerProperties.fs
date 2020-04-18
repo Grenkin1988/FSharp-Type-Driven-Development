@@ -35,3 +35,51 @@ module PollingConsumerProperties =
             expected =! actual
 
         Check.QuickThrowOnFailure test
+
+    [<Test>]
+    let ``transitionFromReady returns correct result when it should not poll`` () =
+        let test (rd : ReadyData) (mh : Timed<MessageHandler option>) =        
+            let shouldPoll _ = false
+            let poll _ = mh
+
+            let actual : State =
+                transitionFromReady shouldPoll poll rd
+
+            let expected = StoppedState
+            expected =! actual
+
+        Check.QuickThrowOnFailure test
+
+    [<Test>]
+    let ``transitionFromReady returns correct result when polling no message`` () =
+        let test (rd : ReadyData) (mh : Timed<unit>) =        
+            let shouldPoll _ = true
+            let poll _ = 
+                mh |> Untimed.withResult None
+
+            let actual : State =
+                transitionFromReady shouldPoll poll rd
+
+            let expected =
+                mh |> Untimed.withResult rd.Result |> NoMessageState
+            expected =! actual
+
+        Check.QuickThrowOnFailure test
+
+    [<Test>]
+    let ``transitionFromReady returns correct result when polling message`` () =
+        let test (rd : ReadyData) (mh : Timed<MessageHandler>) =        
+            let shouldPoll _ = true
+            let poll _ = 
+                mh |> Untimed.withResult (Some mh.Result)
+
+            let actual : State =
+                transitionFromReady shouldPoll poll rd
+
+            let expected =
+                mh |> Untimed.withResult (rd.Result, mh.Result)
+                |> ReceivedMessageState
+            expected =! actual
+
+        Check.QuickThrowOnFailure test    
+
