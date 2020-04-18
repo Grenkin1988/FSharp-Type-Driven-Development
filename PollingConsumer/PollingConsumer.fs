@@ -57,6 +57,18 @@ let transitionFromReceived (rm : ReceivedMessageData) =
     let totalDuration = pollDuration + handleDuration
     t |> Untimed.withResult (totalDuration :: durations) |> ReadyState
 
+// State machine
 
+let rec unfurl getNext state =
+    seq {
+        yield state
+        let next = getNext state
+        yield! unfurl getNext next
+    }
+
+
+
+let run transition start =
+    StoppedState
 
 
