@@ -30,6 +30,7 @@ type State =
     | StoppedState
 
 // Transitions
+let transitionFromStopped = StoppedState
 
 let transitionFromNoMessage shouldIdle idle nm =
     if shouldIdle ()
@@ -48,6 +49,13 @@ let transitionFromReady shouldPoll poll (r : ReadyData) =
             |> ReceivedMessageState
     else StoppedState
 
+let transitionFromReceived (rm : ReceivedMessageData) = 
+    let durations, handleMessage = rm.Result
+    let t = handleMessage.Handle ()
+    let pollDuration = rm.Duration
+    let handleDuration = t.Duration
+    let totalDuration = pollDuration + handleDuration
+    t |> Untimed.withResult (totalDuration :: durations) |> ReadyState
 
 
 
