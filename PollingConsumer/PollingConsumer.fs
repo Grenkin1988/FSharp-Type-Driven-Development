@@ -32,5 +32,6 @@ type State =
 // Transitions
 
 let transitionFromNoMessage shouldIdle idle nm =
-    StoppedState
-
+    if shouldIdle ()
+    then idle () |> Untimed.withResult nm.Result |> ReadyState
+    else StoppedState
