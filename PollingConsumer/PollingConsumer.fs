@@ -22,20 +22,20 @@ type ReceivedMessageData = Timed<TimeSpan list * MessageHandler>
 
 type NoMessageData = Timed<TimeSpan list>
 
+type StoppedData = TimeSpan list
+
 // State
 type State =
     | ReadyState of ReadyData
     | ReceivedMessageState of ReceivedMessageData
     | NoMessageState of NoMessageData
-    | StoppedState
+    | StoppedState of StoppedData
 
 // Transitions
-let transitionFromStopped = StoppedState
-
 let transitionFromNoMessage shouldIdle idle nm =
     if shouldIdle ()
     then idle () |> Untimed.withResult nm.Result |> ReadyState
-    else StoppedState
+    else StoppedState nm.Result
 
 let transitionFromReady shouldPoll poll (r : ReadyData) =
     if shouldPoll ()
@@ -47,7 +47,7 @@ let transitionFromReady shouldPoll poll (r : ReadyData) =
             msg 
             |> Untimed.withResult (r.Result, mh) 
             |> ReceivedMessageState
-    else StoppedState
+    else StoppedState r.Result
 
 let transitionFromReceived (rm : ReceivedMessageData) = 
     let durations, handleMessage = rm.Result
@@ -66,9 +66,19 @@ let rec unfurl getNext state =
         yield! unfurl getNext next
     }
 
-let isStopped = function StoppedState -> true | _ -> false
+let isStopped = function StoppedState _ -> true | _ -> false
 
 let run states =
-    states |> Seq.last
+    let takeUntil predicate (s : seq<'a>) =
+        let rec loop (en : Collections.Generic.IEnumerator<_>) = seq {
+            if en.MoveNext() then
+                yield en.Current
+                if not (predicate en.Current) then
+                    yield! loop en }
+        seq {
+            use en = s.GetEnumerator()
+            yield! loop en
+        }                
+    states |> takeUntil isStopped |> Seq.last
 
 

@@ -66,4 +66,5 @@ module StateMachineTests =
         states |> List.exists isStopped ==> lazy
         
         let actual = run states
-        test <@ isStopped actual @>
+        let expected = states |> List.find isStopped
+        expected =! actual

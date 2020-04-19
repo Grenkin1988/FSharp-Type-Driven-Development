@@ -32,7 +32,7 @@ module TransitionTests =
             let actual : State =
                 transitionFromNoMessage shouldIdle idle nm
 
-            let expected = StoppedState
+            let expected = StoppedState nm.Result
             expected =! actual
 
         Check.QuickThrowOnFailure test
@@ -46,7 +46,7 @@ module TransitionTests =
             let actual : State =
                 transitionFromReady shouldPoll poll rd
 
-            let expected = StoppedState
+            let expected = StoppedState rd.Result
             expected =! actual
 
         Check.QuickThrowOnFailure test
