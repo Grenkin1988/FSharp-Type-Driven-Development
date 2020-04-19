@@ -5,8 +5,14 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ColorPrint.fs" />
     <Compile Include="Timed.fs" />
     <Compile Include="PollingConsumer.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Implementations.fs" />
+    <Compile Include="Statistics.fs" />
+    <Compile Include="Simulation.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 </Project>

@@ -57,6 +57,8 @@ let transitionFromReceived (rm : ReceivedMessageData) =
     let totalDuration = pollDuration + handleDuration
     t |> Untimed.withResult (totalDuration :: durations) |> ReadyState
 
+let transitionFromStopped s = StoppedState s
+
 // State machine
 
 let rec unfurl getNext state =
@@ -81,4 +83,17 @@ let run states =
         }                
     states |> takeUntil isStopped |> Seq.last
 
+let transition shouldPoll poll shouldIdle idle state =
+    match state with
+    | ReadyState r -> transitionFromReady shouldPoll poll r
+    | ReceivedMessageState rm -> transitionFromReceived rm
+    | NoMessageState nm -> transitionFromNoMessage shouldIdle idle nm
+    | StoppedState s -> transitionFromStopped s
 
+let startOn clock = [] |> Timed.capture clock |> ReadyState
+
+let durations = function
+    | ReadyState r -> r.Result
+    | ReceivedMessageState rm -> fst rm.Result
+    | NoMessageState nm -> nm.Result
+    | StoppedState s -> s
