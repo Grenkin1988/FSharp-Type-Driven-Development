@@ -33,12 +33,12 @@ type State =
 
 // Transitions
 let transitionFromNoMessage shouldIdle idle nm =
-    if shouldIdle ()
+    if shouldIdle nm
     then idle () |> Untimed.withResult nm.Result |> ReadyState
     else StoppedState nm.Result
 
 let transitionFromReady shouldPoll poll (r : ReadyData) =
-    if shouldPoll ()
+    if shouldPoll r
     then
         let msg = poll()
         match msg.Result with
